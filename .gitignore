@@ -1,0 +1,23 @@
+# Ignoriši API ključeve i privatne konfiguracije
+.env
+
+# Python fajlovi i cache
+__pycache__/
+*.pyc
+
+# Logovi i privremeni fajlovi
+*.log
+*.tmp
+
+# Izveštaji
+data/scan_results.json
+data/summary.json
+data/*.pdf
+
+# IDE konfiguracije
+.vscode/
+.idea/
+
+# Sistemski fajlovi
+.DS_Store
+Thumbs.db

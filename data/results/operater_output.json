@@ -1,0 +1,10 @@
+{
+  "title": "HackerOne",
+  "meta": "The Zooplus Bug Bounty Program enlists the help of the hacker community at HackerOne to make Zooplus more secure. HackerOne is the #1 hacker-powered security platform, helping organizations find and fix critical vulnerabilities before they can be criminally exploited.",
+  "links": [],
+  "rules": [
+    "no DDoS",
+    "no auth bypass",
+    "respect scope"
+  ]
+}
