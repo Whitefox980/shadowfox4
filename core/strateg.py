@@ -1,15 +1,19 @@
-import json
-from core.ai_memory import AIMemory
-
+import json, os
+from core.memory import MissionMemory
 class Strateg:
-    def __init__(self, scan_path="data/scan_results.json"):
+    def __init__(self):
+        self.memory = MissionMemory()
+        scan_path = "data/scan_results.json"
+        if not os.path.exists(scan_path):
+            with open(scan_path, "w") as f:
+                json.dump({}, f)
         with open(scan_path) as f:
-            self.scan = json.load(f)
-        self.memory = AIMemory()
-
-    def generate_strategy(self):
-        plan = {}
+            self.results = json.load(f)
+    def generate_strategy(self, results):
+        self.scan = results
         used_modules = list(self.scan.keys())
+    # (ostatak tvoje logike za mutacije ili strategiju)
+        plan = {}
 
         # Pamtimo sve što je bilo deo misije
         for mod in used_modules:
@@ -22,7 +26,10 @@ class Strateg:
 
         # Koristi evoluciju da napravi novi plan
         top = self.memory.evolve_strategy()
-        for mod in top[:5]:
+        print("[STRATEG] Top moduli iz prethodnih misija:")
+        plan = {}
+        for mod, count in top.get("prioritet_moduli", [])[:5]:
+            print(f" - {mod}: {count} uspešnih pogodaka")
             plan[mod] = [mod]  # Format da bude isti kao attack_plan
 
         return plan

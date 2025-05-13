@@ -1,33 +1,65 @@
-import json
+import os
 import openai
 
-class AIBrain:
-    def __init__(self, site_data):
-        self.site_data = site_data
+class BrainSuggestion:
+    def __init__(self, metadata):
+        self.metadata = metadata
+        openai.api_key = os.getenv("OPENAI_API_KEY")
 
-    def suggest_plan(self):
+    def plan(self):
         prompt = f"""
-Analiziraj sajt na osnovu sledećih informacija i predloži konkretne fuzz testove ili mutacije napada.
+Analiziraj sledeće metapodatke o sajtu i predloži koji fuzz moduli treba da se pokrenu (izaberi do 5):
 
-TITLE: {self.site_data.get('title')}
-META: {self.site_data.get('meta')}
-LINKOVI: {self.site_data.get('links')[:5]}
+Title: {self.metadata.get("title")}
+Description: {self.metadata.get("meta_description")}
+Links: {', '.join(self.metadata.get("links", [])[:5])}
 
-Vrati JSON u formatu: {{
-  "SQL Injection": ["napad1", "napad2"],
-  "XSS": ["napad1"],
-  ...
-}}
+Moduli koje možeš izabrati:
+- SQL Injection
+- XSS
+- LFI
+- RFI
+- SSRF
+- CMD Injection
+- Open Redirect
+- CSRF
+- CORS
+- JWT
+- XXE
+- DNS Hijack
+- Buffer Overflow
+- Race Condition
+- NoSQL Injection
+- Host Header Injection
+- Web Cache Poisoning
+- Log Injection
+- Time-Based SQLi
+- RCE
+- HTTP Method
+- LDAP
 
-Koristi precizne tehničke izraze. Ne dodaj objašnjenja.
+Vrati listu samo imena modula u JSON nizu.
 """
 
         try:
             response = openai.ChatCompletion.create(
                 model="gpt-4o",
-                messages=[{"role": "user", "content": prompt}],
+                messages=[
+                    {"role": "system", "content": "Ti si AI sigurnosni analitičar."},
+                    {"role": "user", "content": prompt}
+                ],
                 temperature=0.3
             )
-            return json.loads(response.choices[0].message.content.strip())
+
+            text = response.choices[0].message.content.strip()
+            return self._extract_modules(text)
+
         except Exception as e:
-            return {"error": str(e)}
+            return ["SQL Injection", "XSS", "LFI"]  # fallback
+
+    def _extract_modules(self, text):
+        import json
+        try:
+            return json.loads(text)
+        except:
+            return ["SQL Injection", "XSS"]

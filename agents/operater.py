@@ -1,30 +1,36 @@
 import requests
 from bs4 import BeautifulSoup
-from core.shadow_core_log import log
+from utils.logger import log_info, log_error
 
 class AIOperater:
     def __init__(self, url):
         self.url = url
-        self.rules = ["no DDoS", "no auth bypass", "respect scope"]
 
     def analyze(self):
         try:
             response = requests.get(self.url, timeout=10)
             soup = BeautifulSoup(response.text, "html.parser")
+            title = soup.title.string.strip() if soup.title else "Unknown"
+            meta_tag = soup.find("meta", attrs={"name": "description"})
+            meta = meta_tag["content"].strip() if meta_tag else "N/A"
+            links = [link.get("href") for link in soup.find_all("a") if link.get("href")]
 
-            metadata = {
-                "title": soup.title.string.strip() if soup.title else "N/A",
-                "meta": self.extract_meta(soup),
-                "links": list({a.get("href") for a in soup.find_all("a") if a.get("href") and a.get("href").startswith("http")}),
-                "rules": self.rules
+            site_data = {
+                "title": title,
+                "meta_description": meta,
+                "links": links[:10]
             }
 
-            log("Operater", f"Analizirana meta: {metadata['title']}")
-            return metadata
+            log_info(f"Analizirana meta: {title}")
+            return {"site_data": site_data}
 
         except Exception as e:
-            log("Operater", f"Greška pri analizi: {e}", status="error")
-            return {}
+            log_error(f"Greška pri analizi: {e}")
+            return {"site_data": {
+                "title": "Unknown",
+                "meta_description": "N/A",
+                "links": []
+            }}
 
     def extract_meta(self, soup):
         meta_tag = soup.find("meta", attrs={"name": "description"})

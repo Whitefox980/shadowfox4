@@ -1,7 +1,6 @@
 import sys
 import json
 import os
-
 from agents.operater import AIOperater
 from agents.kljucar import Kljucar
 from agents.shadow_agent import ShadowAgent
@@ -16,9 +15,18 @@ def run_all(target_url):
     print(f"\n[+] META: {target_url}\n")
 
     # Operater
-    print("[1] Analiza mete (Operater)...")
+    print("[1] Analiziram metu (Operater)...")
     oper = AIOperater(target_url)
     analysis = oper.analyze()
+
+    if "site_data" not in analysis or not analysis["site_data"].get("title"):
+        print("[!] UPOZORENJE: Nedovoljna analiza - koristi se fallback.")
+        analysis["site_data"] = {
+            "title": "Unknown",
+            "meta_description": "N/A",
+            "links": []
+        }
+
     save_json(analysis, "data/analysis.json")
     save_json([target_url], "data/targets.json")
 
@@ -44,8 +52,12 @@ def run_all(target_url):
     summary = load_summary()
     show_summary(summary)
 
-    # PDF
+    # PDF fallback init
     print("[6] Kreiram PDF izveštaj...")
+    if not os.path.exists("data/mission_history.json"):
+        with open("data/mission_history.json", "w") as f:
+            json.dump([], f)
+
     from scripts.generate_report import generate_pdf
     generate_pdf()
 
@@ -53,4 +65,5 @@ if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python start_mission.py <URL>")
         sys.exit(1)
+
     run_all(sys.argv[1])

@@ -4,33 +4,19 @@ from fuzzers import *
 from core.ai_memory import AIMemory
 
 class ShadowAgent:
-    def __init__(self, attack_plan, targets):
-        self.attack_plan = attack_plan
-        self.targets = targets
-        self.memory = AIMemory()
+    def __init__(self, attack_plan, target):
+        self.attack_plan = attack_plan  # lista fuzz modula (instanci)
+        self.target = target
 
     def execute_plan(self):
         results = {}
-
-        for module_name, module_list in self.attack_plan.items():
-            for mod in module_list:
-                fuzz_module = self.load_fuzzer(mod)
-                if not fuzz_module:
-                    continue
-
-                print(f"[ShadowAgent] Pokrećem modul: {mod}")
-                result = fuzz_module.run_tests(self.targets)
-                results[mod] = result
-
-                # Ako detektovana ranjivost → beleži kao uspešan
-                for verdict in result.values():
-                    if isinstance(verdict, str) and "VULNERABLE" in verdict:
-                        self.memory.record_success(mod)
-
-        self.memory.remember_mission(results)
-        self.memory.save()
+        for module in self.attack_plan:
+            try:
+                module_result = module.run_tests([self.target])
+                results[module.name] = module_result
+            except Exception as e:
+                results[module.name] = f"ERROR: {str(e)}"
         return results
-
     def load_fuzzer(self, mod_name):
         fuzz_map = {
             "SQL Injection": SQLFuzzer,

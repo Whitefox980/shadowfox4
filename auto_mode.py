@@ -70,8 +70,8 @@ def main():
     print("[AI BRAIN] Preporučeni moduli:", plan)
 
     scanner = ShadowScanCore([url])
-    mod_filter = AIModuleFilter(scanner.modules)
-    selected_modules = mod_filter.extract(plan)
+    mod_filter = AIModuleFilter(scanner.modules, plan)
+    selected_modules = mod_filter.extract_suggested()
 
     print("[AUTO] 3. AI Ključar bira alate...")
     kljucar = AIKljucar(analysis["site_data"])
