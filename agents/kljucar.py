@@ -2,9 +2,8 @@ import json
 from core.shadow_core_log import log
 
 class Kljucar:
-    def __init__(self, analysis_path="data/results/operater_output.json"):
-        with open(analysis_path) as f:
-            self.analysis = json.load(f)
+    def __init__(self, analysis_data):  # Prima dict, više ne čita fajl
+        self.analysis = analysis_data
 
     def generate_plan(self):
         plan = {
@@ -39,5 +38,5 @@ class Kljucar:
         if "access-control" in meta:
             plan["CORS"] = True
 
-        log("Ključar", f"Planirana upotreba alata: {', '.join(k for k, v in plan.items() if v)}")
+        log("Ključar", f"Planirana upotreba alata: {{ {', '.join(k for k, v in plan.items() if v)} }}")
         return plan

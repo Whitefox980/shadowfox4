@@ -1,6 +1,13 @@
 import os
 import openai
 
+class AIBrain:
+    def __init__(self):
+        pass
+
+    def plan(self):
+        # Vraća dummy listu vektora (za sad)
+        return ["SQL Injection", "XSS", "LFI"]
 class BrainSuggestion:
     def __init__(self, metadata):
         self.metadata = metadata

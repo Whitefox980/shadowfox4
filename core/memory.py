@@ -9,11 +9,16 @@ class MissionMemory:
                 json.dump([], f)
         with open(self.path) as f:
             self.history = json.load(f)
-
     def remember_mission(self, scan_data):
-        self.history.append(scan_data)
-        self.save()
+        target = scan_data.get("target", "unknown_target")
+    
+        if target not in self.history:
+            self.history[target] = []
 
+            self.history[target].append(scan_data)
+
+        with open(self.path, "w") as f:
+            json.dump(self.history, f, indent=2)
     def save(self):
         with open(self.path, "w") as f:
             json.dump(self.history, f, indent=2)
@@ -25,16 +30,17 @@ class MissionMemory:
         return self.history[-1] if self.history else None
 
     def evolve_strategy(self):
-        if not self.history:
-            return {"note": "Nema prethodnih misija za analizu."}
+        scores = {}
 
-        module_stats = {}
-        for mission in self.history:
-            for module_name, result in mission.items():
-                if module_name not in module_stats:
-                    module_stats[module_name] = 0
-                if isinstance(result, dict) and result.get("success"):
-                    module_stats[module_name] += 1
+        for mission_list in self.history.values():
+            for mission in mission_list:
+                if isinstance(mission, dict):
+                    for module_name, result in mission.items():
+                        if module_name not in scores:
+                            scores[module_name] = 0
+                        if isinstance(result, dict) and result.get("success"):
+                            scores[module_name] += 1
 
-        sorted_modules = sorted(module_stats.items(), key=lambda x: x[1], reverse=True)
-        return {"prioritet_moduli": sorted_modules}
+    # Sortiramo top 5 po uspehu
+        top_modules = sorted(scores, key=scores.get, reverse=True)
+        return top_modules[:5]

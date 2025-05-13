@@ -20,17 +20,24 @@ class Strateg:
             for target, result in self.scan[mod].items():
                 if isinstance(result, str) and "VULNERABLE" in result:
                     self.memory.record_success(mod)
+        import time
 
+        mission = {
+        "results": self.scan,
+        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
+        }
+        self.memory.remember_mission(mission)
         self.memory.remember_mission(self.scan)
         self.memory.save()
 
-        # Koristi evoluciju da napravi novi plan
+             # Koristi evoluciju da napravi novi plan
         top = self.memory.evolve_strategy()
         print("[STRATEG] Top moduli iz prethodnih misija:")
+
         plan = {}
-        for mod, count in top.get("prioritet_moduli", [])[:5]:
-            print(f" - {mod}: {count} uspešnih pogodaka")
-            plan[mod] = [mod]  # Format da bude isti kao attack_plan
+        for mod in top:
+            print(f" - {mod}")
+            plan[mod] = [mod]
 
         return plan
 

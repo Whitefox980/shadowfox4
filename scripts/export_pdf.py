@@ -1,42 +1,40 @@
 import json
+import os
 from datetime import datetime
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
-import os
+from core.memory import MissionMemory
 
 def export_to_pdf(index):
-    # Učitaj sve misije
-    with open("data/mission_history.json") as f:
-        history = json.load(f)
+    memory = MissionMemory()
+    history = memory.get_all_missions()
 
-    entry = history[::-1][index - 1]
-    timestamp = entry['timestamp'].replace(":", "-")
-    mission_file = f"data/missions/mission_{timestamp}.json"
-
-    if not os.path.exists(mission_file):
-        print(f"[ERROR] Izveštaj {mission_file} ne postoji.")
+    if index < 0 or index >= len(history):
+        print("[ERROR] Neispravan broj misije.")
         return
 
-    with open(mission_file) as f:
-        details = json.load(f)
+    entry = history[::-1][index]  # Uzima poslednje (ili n-to poslednje) unazad
+    timestamp = entry.get("timestamp", "Nepoznat datum")
+    results = entry.get("results", {})
+    target = entry.get("target", "Nepoznata meta")
 
-    pdf_file = f"data/missions/mission_{timestamp}.pdf"
+    pdf_file = f"data/missions/mission_{timestamp.replace(':', '-')}.pdf"
     c = canvas.Canvas(pdf_file, pagesize=A4)
     width, height = A4
     y = height - 40
 
     c.setFont("Helvetica-Bold", 14)
-    c.drawString(40, y, f"ShadowFox Misija: {entry['target']}")
+    c.drawString(40, y, f"ShadowFox Misija: {target}")
     y -= 20
     c.setFont("Helvetica", 12)
-    c.drawString(40, y, f"Datum: {entry['timestamp']}")
+    c.drawString(40, y, f"Datum: {timestamp}")
     y -= 30
 
     c.setFont("Helvetica-Bold", 12)
     c.drawString(40, y, "REZULTATI:")
     y -= 20
 
-    for mod, res in details.items():
+    for mod, res in results.items():
         c.setFont("Helvetica-Bold", 11)
         c.drawString(50, y, f"[{mod}]")
         y -= 15
