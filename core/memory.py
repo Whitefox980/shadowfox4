@@ -10,15 +10,9 @@ class MissionMemory:
         with open(self.path) as f:
             self.history = json.load(f)
     def remember_mission(self, scan_data):
-        target = scan_data.get("target", "unknown_target")
-    
-        if target not in self.history:
-            self.history[target] = []
+        self.history.append(scan_data)
+        self.save()
 
-            self.history[target].append(scan_data)
-
-        with open(self.path, "w") as f:
-            json.dump(self.history, f, indent=2)
     def save(self):
         with open(self.path, "w") as f:
             json.dump(self.history, f, indent=2)

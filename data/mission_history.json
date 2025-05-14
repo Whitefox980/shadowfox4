@@ -122,5 +122,20 @@
       "LFI"
     ],
     "hits": 0
+  },
+  {
+    "target": "https://hackerone.com/hubspot?type=team",
+    "timestamp": "2025-05-14 17:53:08",
+    "results": {
+      "DAOLYAP_DENIFEDNU": true,
+      "UNDEFINED_PAYLOAD--": true,
+      "UNDEFINED_PAYLOAD": true,
+      "UNdeFiNed_pAyLoAD": true,
+      ">tpircs/<)\"X\"(trela>tpircs<": false,
+      "<script>alert(\"X\")</script>--": true,
+      "<script>alert(\"X\")</script>": false,
+      "<sCRipT>AleRT(\"x\")</SCRIpT>": true,
+      "unDefiNed_pAYlOaD": false
+    }
   }
 ]
