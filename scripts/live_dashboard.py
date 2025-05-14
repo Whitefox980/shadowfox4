@@ -1,38 +1,40 @@
-def start_dashboard():
-    console = Console()
-    console.clear()
-    console.rule("[bold green]ShadowFox Dashboard")
+import json
+import os
+import time
+from rich.live import Live
+from rich.table import Table
+from rich.panel import Panel
 
-    data = load_results()
+HISTORY_PATH = "data/fuzz_history.json"
 
-    if not data:
-        console.print("[red]Nema rezultata za prikaz.")
-        return
+def load_history():
+    if not os.path.exists(HISTORY_PATH):
+        return {}
+    with open(HISTORY_PATH) as f:
+        return json.load(f)
 
-    for target, results in data.items():
-        console.print(f"\n[bold cyan]Meta:[/bold cyan] {target}")
+def build_table(history):
+    table = Table(title="ShadowFox - Live Fuzz Dashboard")
+    table.add_column("Attack Type", justify="left")
+    table.add_column("Success", justify="center")
+    table.add_column("Total", justify="center")
+    table.add_column("Rate", justify="right")
 
-        table = Table(show_header=True, header_style="bold magenta")
-        table.add_column("Modul", width=20)
-        table.add_column("Broj Payload-a", justify="center")
-        table.add_column("Status", justify="center")
+    for attack_type, entries in history.items():
+        total = len(entries)
+        success = sum(1 for e in entries if e.get("success"))
+        rate = f"{round((success / total) * 100, 2)}%" if total else "0%"
+        table.add_row(attack_type, str(success), str(total), rate)
 
-        # NOVI FORMAT
-        if isinstance(results, dict):
-            for modul, payloads in results.items():
-                if isinstance(payloads, list):
-                    status = "Završeno"
-                    count = str(len(payloads))
-                elif isinstance(payloads, str):
-                    status = payloads
-                    count = "0"
-                else:
-                    status = "Nepoznat format"
-                    count = "?"
-                table.add_row(modul, count, status)
+    return table
 
-        # STARI FORMAT
-        elif isinstance(results, list):
-            table.add_row("Legacy Log", str(len(results)), "Lista payload-a")
+def live_dashboard():
+    with Live(refresh_per_second=1) as live:
+        while True:
+            history = load_history()
+            table = build_table(history)
+            live.update(Panel(table, title="[bold green]ShadowFox Mission Center", border_style="green"))
+            time.sleep(2)
 
-        console.print(table)
+if __name__ == "__main__":
+    live_dashboard()

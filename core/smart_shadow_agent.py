@@ -25,10 +25,10 @@ class SmartShadowAgent:
 
         all_payloads = []
         for vector in attack_vectors:
-        fuzzer = AdaptiveFuzzer(vector)
-        fuzz_results = fuzzer.fuzz_target(target)
-        for fr in fuzz_results:
-            all_payloads.append(fr)
+            fuzzer = AdaptiveFuzzer(vector)
+            fuzz_results = fuzzer.fuzz_target(target)
+            for fr in fuzz_results:
+                all_payloads.append(fr)
 
         return {"target": target, "payloads": all_payloads}
     def test_payload(self, target, payload):
@@ -63,15 +63,17 @@ class SmartShadowAgent:
 
         mem = MissionMemory()
         mem.remember_mission(mission)
-
     def run(self, target):
-        """Kompletna rutina: AI bira napad, mutira i testira"""
         print(f"[SMART] Pokrećem AI napad na metu: {target}")
         attack_plan = self.generate_attack_plan(target)
-        results = attack_plan["payloads"]  # već sadrži success info
+        results = []
 
-        for payload in attack_plan["payloads"]:
-            success = self.test_payload(attack_plan["target"], payload)
-            results.append({"payload": payload, "success": success})
+        for vector in attack_plan["payloads"]:
+            fuzzer = AdaptiveFuzzer(vector)
+            result = fuzzer.fuzz_target(target)
+            for r in result:
+                results.append(r)
+
         self.save_results(target, results)
         print(f"[SMART] Završeno skeniranje sa {len(results)} payload-a.")
+
