@@ -21,3 +21,4 @@ data/*.pdf
 # Sistemski fajlovi
 .DS_Store
 Thumbs.db
+data/payload_results.json
