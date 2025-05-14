@@ -137,5 +137,12 @@
       "<sCRipT>AleRT(\"x\")</SCRIpT>": true,
       "unDefiNed_pAYlOaD": false
     }
+  },
+  {
+    "target": "https://hackerone.com/hubspot?type=team",
+    "timestamp": "2025-05-15 00:19:19",
+    "results": {
+      "UNDEFINED_PAYLOAD": false
+    }
   }
 ]

@@ -67,6 +67,7 @@ class SmartShadowAgent:
         mem = MissionMemory()
         mem.remember_mission(mission)
     def run(self, target):
+        self.target = target
         stealth = StealthFuzzer(self.target)
         stealth.simulate_traffic()
         print(f"[SMART] Pokrećem AI napad na metu: {target}")
@@ -75,18 +76,22 @@ class SmartShadowAgent:
 
         for vector in attack_plan["payloads"]:
             fuzzer = AdaptiveFuzzer(vector)
-            result = fuzzer.fuzz_target(target)
-            for r in result:
-                results.append({
-    "payload": r["payload"],
-    "success": r["success"],
-    "signature": {
-        "vector": vector,
-        "agent": "CUPKO-AI",
-        "timestamp": datetime.now().isoformat(),
-        "hash": hashlib.sha256(r["payload"].encode()).hexdigest()[:10]
-    }
-})
+            fuzz_results = fuzzer.fuzz_target(target)
+
+            if not fuzz_results:
+                print(f"[!] Fuzzer nije vratio rezultate za vektor: {vector}")
+                continue  # preskoči ovaj vektor
+        for r in fuzz_results:
+              results.append({
+        "payload": r["payload"],
+        "success": r["success"],
+        "signature": {
+            "vector": vector,
+            "agent": "CUPKO-AI",
+            "timestamp": datetime.now().isoformat(),
+            "hash": hashlib.sha256(r["payload"].encode()).hexdigest()[:10]
+            }
+         }) 
         self.save_results(target, results)
         print(f"[SMART] Završeno skeniranje sa {len(results)} payload-a.")
 
