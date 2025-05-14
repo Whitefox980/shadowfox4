@@ -7,6 +7,9 @@ from core.memory import MissionMemory
 from core.ai_brain import BrainSuggestion
 from datetime import datetime
 from fuzzers.adaptive_fuzzer import AdaptiveFuzzer
+import hashlib
+from datetime import datetime
+from fuzzers.stealth_fuzzer import StealthFuzzer
 
 class SmartShadowAgent:
     def __init__(self):
@@ -64,6 +67,8 @@ class SmartShadowAgent:
         mem = MissionMemory()
         mem.remember_mission(mission)
     def run(self, target):
+        stealth = StealthFuzzer(self.target)
+        stealth.simulate_traffic()
         print(f"[SMART] Pokrećem AI napad na metu: {target}")
         attack_plan = self.generate_attack_plan(target)
         results = []
@@ -72,8 +77,16 @@ class SmartShadowAgent:
             fuzzer = AdaptiveFuzzer(vector)
             result = fuzzer.fuzz_target(target)
             for r in result:
-                results.append(r)
-
+                results.append({
+    "payload": r["payload"],
+    "success": r["success"],
+    "signature": {
+        "vector": vector,
+        "agent": "CUPKO-AI",
+        "timestamp": datetime.now().isoformat(),
+        "hash": hashlib.sha256(r["payload"].encode()).hexdigest()[:10]
+    }
+})
         self.save_results(target, results)
         print(f"[SMART] Završeno skeniranje sa {len(results)} payload-a.")
 

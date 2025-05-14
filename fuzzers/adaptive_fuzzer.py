@@ -23,16 +23,17 @@ class AdaptiveFuzzer:
     def evolve_payloads(self, payloads):
         evolved = [self.engine.mutate_payload(p) for p in payloads]
         return [item for sublist in evolved for item in sublist]
-
     def test_payload(self, target, payload):
-        headers = fake_headers()
-        try:
-            response = requests.get(target, headers=headers, params={"q": payload}, timeout=5)
-            success = "error" in response.text.lower() or response.status_code >= 500
-        except:
-            success = False
-        random_delay()
-        return success
+    headers = fake_headers()
+    try:
+        response = requests.get(target, headers=headers, params={"q": payload}, timeout=5)
+        response_text = response.text.lower()
+        response_code = response.status_code
+        success = "error" in response_text or response_code >= 500
+        return success, response_text
+    except:
+        return False, ""
+    random_delay()
 
     def fuzz_target(self, target):
         history = self.load_history()
@@ -46,6 +47,14 @@ class AdaptiveFuzzer:
             payloads = [self.engine.generate_payload(self.attack_type)]
         results = []
         for payload in payloads:
-            success = self.test_payload(target, payload)
-            results.append({"payload": payload, "success": success})
-        return results
+            success, response_text = self.test_payload(target, payload)
+    
+            db_type = self.engine.detect_db_type(response_text)
+            adapted = self.engine.adapt_to_environment(db_type)
+
+            results.append({
+                "payload": payload,
+                "success": success,
+                "db_type": db_type,
+                "adapted_payload": adapted
+         })

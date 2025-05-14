@@ -1,9 +1,21 @@
 import random
+import re
 
 class MutationEngine:
     def __init__(self):
         self.attack_types = ["SQLi", "XSS", "JWT", "SSRF"]
-
+    def detect_db_type(self, response_text):
+        """Vrši heuristiku nad odgovorom da bi procenio bazu"""
+        if "You have an error in your SQL syntax" in response_text:
+            return "MySQL"
+        elif "pg_query()" in response_text or "PostgreSQL" in response_text:
+            return "PostgreSQL"
+        elif "SQL Server" in response_text or "Microsoft" in response_text:
+            return "MSSQL"
+        elif "MongoServerError" in response_text or "BSON" in response_text:
+            return "MongoDB"
+        else:
+            return "Unknown"
     def generate_payload(self, attack_vector):
         """Generiše payload na osnovu vektora napada"""
         if attack_vector == "SQLi":

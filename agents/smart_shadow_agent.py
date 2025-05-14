@@ -119,3 +119,17 @@ class SmartShadowAgent:
 
         with open("data/attack_stats.json", "w") as f:
             json.dump(existing, f, indent=2)
+from datetime import datetime
+
+def save_results(self, target, results):
+    # ... postojeći kod ...
+
+    # Shadow signature zapis
+    sig_path = f"data/signatures/{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_{target.replace('/', '_')}.sig"
+    os.makedirs("data/signatures", exist_ok=True)
+    with open(sig_path, "w") as sig:
+        sig.write(f"ShadowFox v4\n")
+        sig.write(f"Target: {target}\n")
+        sig.write(f"Payloads: {len(results)}\n")
+        sig.write(f"Author: CUPKO-AI\n")
+        sig.write(f"SignatureID: {hash(target + str(datetime.now())) % 999999999}\n")
