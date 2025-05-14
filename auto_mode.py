@@ -9,21 +9,28 @@ from agents.operator import Operater
 from core.ai_brain import BrainSuggestion
 from agents.kljucar import Kljucar
 from agents.shadow_agent import ShadowAgent
-from agents.smart_shadow_agent import SmartShadowAgent
+from core.smart_shadow_agent import SmartShadowAgent
 from core.strateg import Strateg
 
 def save_results(results, target):
+    from datetime import datetime
+
+    # 1. Summary zapis
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     summary = {
         "time": timestamp,
         "target": target,
         "modules": list(results),
-        "vulns": sum("VULNERABLE" in str(r) for r in results.values())
+        "hits": sum("VULNERABLE" in str(r) for r in results.values())
     }
+
     try:
         with open("data/mission_history.json", "r") as f:
             history = json.load(f)
-    except FileNotFoundError:
+            if not isinstance(history, list):
+                print("[WARN] mission_history.json nije lista — resetujem.")
+                history = []
+    except:
         history = []
 
     history.append(summary)
@@ -31,12 +38,29 @@ def save_results(results, target):
     with open("data/mission_history.json", "w") as f:
         json.dump(history, f, indent=2)
 
+    # 2. Payload zapis
+    try:
+        with open("data/payload_results.json", "r") as f:
+            rawlog = json.load(f)
+            if not isinstance(rawlog, dict):
+                print("[WARN] payload_results.json nije dict — resetujem.")
+                rawlog = {}
+    except:
+        rawlog = {}
+
+    rawlog[target] = results  # poslednji rezultat po meti
+
+    with open("data/payload_results.json", "w") as f:
+        json.dump(rawlog, f, indent=2)
+
+    print("[AUTO] Rezultati sačuvani u oba fajla.")
 def main():
-    if len(sys.argv) != 2:
-        print("Usage: python auto_mode.py <target_url>")
+    if len(sys.argv) < 2:
+        print("Usage: python auto_mode.py <target_url> [--dashboard]")
         return
 
     target_url = sys.argv[1]
+    use_dashboard = "--dashboard" in sys.argv
 
     # 1. Operater analizira metu
     print(f"\n[AUTO] 1. Pokrećem Operatera za: {target_url}")
@@ -50,14 +74,14 @@ def main():
     plan = brain.plan()
     print("[AI BRAIN] Preporučeni moduli:", plan)
 
-    # 3. Ključar bira alate
-    print("[AUTO] 3. AI Ključar bira alate...")
+    # 3. Kljucar bira alate
+    print("[AUTO] 3. Kljucar bira alate...")
     kljucar = Kljucar(site_data)
-    selected = kljucar.generate_plan()
+    modules_selected = kljucar.generate_plan(plan)
 
     # 4. ShadowAgent izvršava napade
     print("[AUTO] 4. ShadowAgent izvršava napade...")
-    agent = ShadowAgent(modules=selected, target=target)
+    agent = ShadowAgent(modules_selected, target=target_url)
     results = agent.execute_plan()
     print(f"[SMART] Završeno skeniranje sa {sum(1 for v in results.values() if isinstance(v, list) or v)} payload-a.")
 
@@ -75,10 +99,14 @@ def main():
     # 7. Sačuvaj rezultate
     save_results(results, target_url)
 
-    # 8. Pokreni dashboard
-    subprocess.Popen(["python", "scripts/live_dashboard.py"], start_new_session=True)
-    print("[AUTO] Pokrenut dashboard u pozadini.")
+    # 8. Pokreni dashboard ako je traženo
+    if use_dashboard:
+        subprocess.Popen(["python", "scripts/live_dashboard.py"], start_new_session=True)
+        print("[AUTO] Pokrenut dashboard u pozadini.")
+    from scripts.export_to_pdf import export_to_pdf
 
+# Posle save_results(...)
+    export_to_pdf(results, target_url)
     gc.collect()
     sys.exit(0)
 

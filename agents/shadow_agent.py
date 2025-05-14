@@ -1,53 +1,44 @@
-from shadow_scan_core import ShadowScanCore
-import json
+# agents/shadow_agent.py
+
 from fuzzers import *
-from core.ai_memory import AIMemory
 
 class ShadowAgent:
-    def __init__(self, attack_plan, target):
-        self.attack_plan = attack_plan  # lista fuzz modula (instanci)
+    def __init__(self, modules, target):
+        self.modules = modules  # lista dict-ova: {name, payloads}
         self.target = target
+        self.results = {}
 
     def execute_plan(self):
-        results = {}
-        for module in self.attack_plan:
+        for module in self.modules:
             try:
-                module_result = module.run_tests([self.target])
-                results[module.name] = module_result
+                name = module.get("name")
+                payloads = module.get("payloads", [])
+
+                fuzz_instance = self.load_fuzzer(name)
+                if fuzz_instance is None:
+                    self.results[name] = f"{name} not implemented"
+                    continue
+
+                fuzz_instance.set_target(self.target)
+                fuzz_instance.set_payloads(payloads)
+
+                tested_payloads = []
+                for p in payloads:
+                    # Ovo simulira pravi napad — upiši ovde pravu logiku kad budeš imao
+                    tested_payloads.append(f"{self.target}?p={p}")
+
+                self.results[name] = tested_payloads
+
             except Exception as e:
-                results[module.name] = f"ERROR: {str(e)}"
-        return results
+                self.results[name] = f"ERROR: {str(e)}"
+
+        return self.results
+
     def load_fuzzer(self, mod_name):
         fuzz_map = {
             "SQL Injection": SQLFuzzer,
             "XSS": XSSFuzzer,
             "LFI": LFIFuzzer,
-            "CMD": CMDFuzzer,
-            "Traversal": TraversalFuzzer,
-            "RFI": RFIFuzzer,
-            "SSRF": SSRFFuzzer,
-            "Redirect": RedirectFuzzer,
-            "CORS": CORSFuzzer,
-            "HostHeader": HostHeaderFuzzer,
-            "CSRF": CSRFFuzzer,
-            "XXE": XXEFuzzer,
-            "LDAP": LDAPFuzzer,
-            "JWT": JWTFuzzer,
-            "HTTPMethods": HTTPMethodsFuzzer,
-            "EmailSpoof": EmailSpoofFuzzer,
-            "DNSHijack": DNSHijackFuzzer,
-            "BufferOverflow": BufferOverflowFuzzer,
-            "SideChannel": SideChannelFuzzer,
-            "RaceCondition": RaceConditionFuzzer,
-            "PaddingOracle": PaddingOracleFuzzer,
-            "CachePoison": WebCachePoisoningFuzzer,
-            "LogInjection": LogInjectionFuzzer,
-            "RCE": RCEFuzzer,
-            "TimeSQL": TimeSQLFuzzer,
-            "HeapOverflow": HeapOverflowFuzzer,
-            "SubdomainTakeover": SubdomainTakeoverFuzzer,
-            "NoSQL": NoSQLFuzzer
         }
-
-        klass = fuzz_map.get(mod_name.replace(" ", "").replace("-", ""))
+        klass = fuzz_map.get(mod_name)
         return klass() if klass else None
