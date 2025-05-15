@@ -10,11 +10,17 @@ from fuzzers.adaptive_fuzzer import AdaptiveFuzzer
 import hashlib
 from datetime import datetime
 from fuzzers.stealth_fuzzer import StealthFuzzer
+from agents.mission_memory import MissionMemory
+from core.send_attack import send_attack
+class SmartShadowAgent:
+from core.dynamic_mutator import DynamicPayloadMutator
+# ...
 
 class SmartShadowAgent:
     def __init__(self):
+        self.mutator = DynamicPayloadMutator()
         self.engine = MutationEngine()
-        self.history_file = "data/payload_results.json"
+
 
     def generate_attack_plan(self, target):
         metadata = {
@@ -73,7 +79,6 @@ class SmartShadowAgent:
             self.target = target
             stealth = StealthFuzzer(self.target)
             stealth.simulate_traffic()
-
             attack_plan = self.generate_attack_plan(target)
             results = []
 
@@ -99,8 +104,9 @@ class SmartShadowAgent:
 
                     final_payload = self.mutator.mutate_payload(r["payload"])
                     print(f"[Agent] Finalni payload ({vector}): {final_payload}")
-                    send_attack(target, final_payload)
 
+                    status, resp_text = send_attack(target, final_payload)
+                    final_payload = self.mutator.mutate_payload(final_payload, response_status=status, response_text=resp_text)
             self.save_results(target, results)
             print(f"[SMART] Završeno skeniranje sa {len(results)} payload-a.")
     def send_attack(target, payload):
