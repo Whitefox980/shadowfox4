@@ -2,7 +2,6 @@
 
 import random
 import json
-from core.mutation_engine import MutationEngine
 from core.memory import MissionMemory
 from core.ai_brain import BrainSuggestion
 from datetime import datetime
@@ -13,14 +12,16 @@ from fuzzers.stealth_fuzzer import StealthFuzzer
 from agents.mission_memory import MissionMemory
 from core.send_attack import send_attack
 class SmartShadowAgent:
+from core.mutation_engine import MutationEngine
 from core.dynamic_mutator import DynamicPayloadMutator
-# ...
+from core.stealth import StealthFuzzer
+from core.adaptive_fuzzer import AdaptiveFuzzer
 
 class SmartShadowAgent:
     def __init__(self):
-        self.mutator = DynamicPayloadMutator()
         self.engine = MutationEngine()
-
+        self.mutator = DynamicPayloadMutator()
+        self.history_file = "data/payload_results.json"
 
     def generate_attack_plan(self, target):
         metadata = {
