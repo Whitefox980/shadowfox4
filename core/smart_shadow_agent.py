@@ -66,32 +66,44 @@ class SmartShadowAgent:
 
         mem = MissionMemory()
         mem.remember_mission(mission)
-    def run(self, target):
-        self.target = target
-        stealth = StealthFuzzer(self.target)
-        stealth.simulate_traffic()
-        print(f"[SMART] Pokrećem AI napad na metu: {target}")
-        attack_plan = self.generate_attack_plan(target)
-        results = []
+    def run(self, target, modules):
+            print(f"[Agent] Pokrećem napad na: {target} sa modulima: {modules}")
+            print(f"[EXEC] Pokrećem AI napad na metu: {target}")
 
-        for vector in attack_plan["payloads"]:
-            fuzzer = AdaptiveFuzzer(vector)
-            fuzz_results = fuzzer.fuzz_target(target)
+            self.target = target
+            stealth = StealthFuzzer(self.target)
+            stealth.simulate_traffic()
 
-            if not fuzz_results:
-                print(f"[!] Fuzzer nije vratio rezultate za vektor: {vector}")
-                continue  # preskoči ovaj vektor
-        for r in fuzz_results:
-              results.append({
-        "payload": r["payload"],
-        "success": r["success"],
-        "signature": {
-            "vector": vector,
-            "agent": "CUPKO-AI",
-            "timestamp": datetime.now().isoformat(),
-            "hash": hashlib.sha256(r["payload"].encode()).hexdigest()[:10]
-            }
-         }) 
-        self.save_results(target, results)
-        print(f"[SMART] Završeno skeniranje sa {len(results)} payload-a.")
+            attack_plan = self.generate_attack_plan(target)
+            results = []
 
+            for vector in attack_plan["payloads"]:
+                fuzzer = AdaptiveFuzzer(vector)
+                fuzz_results = fuzzer.fuzz_target(target)
+
+                if not fuzz_results:
+                    print(f"[!] Fuzzer nije vratio rezultate za vektor: {vector}")
+                    continue  # preskoči ovaj vektor
+
+                for r in fuzz_results:
+                    results.append({
+                        "payload": r["payload"],
+                        "success": r["success"],
+                        "signature": {
+                            "vector": vector,
+                            "agent": "CUPKO-AI",
+                            "timestamp": datetime.now().isoformat(),
+                            "hash": hashlib.sha256(r["payload"].encode()).hexdigest()[:10]
+                        }
+                    })
+
+                    final_payload = self.mutator.mutate_payload(r["payload"])
+                    print(f"[Agent] Finalni payload ({vector}): {final_payload}")
+                    send_attack(target, final_payload)
+
+            self.save_results(target, results)
+            print(f"[SMART] Završeno skeniranje sa {len(results)} payload-a.")
+    def send_attack(target, payload):
+            print(f"[EXEC] Slanjem payload-a na {target} ...")
+            print(f"[EXEC] Payload: {payload}")
+    # TODO: Integracija sa HTTP requesterima (requests, httpx itd.)
