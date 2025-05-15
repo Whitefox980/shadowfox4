@@ -3,13 +3,9 @@ class ShadowRecon:
         self.target = target
 
     def analyze_scope(self):
-        if "zooplus" in self.target:
-            return {
-                "allowed": True,
-                "type": "web",
-                "platform": "custom",
-                "domain": "zooplus.com"
-            }
+        # Dummy verzija za test
         return {
-            "allowed": False
+            "allowed": True,
+            "type": "web",
+            "platform": "custom"
         }

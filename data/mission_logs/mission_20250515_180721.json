@@ -1,0 +1,7 @@
+{
+    "target": "https://example.com",
+    "timestamp": "2025-05-15 18:07:21",
+    "results": {
+        "http://169.254.169.254/latest/meta-data/": true
+    }
+}

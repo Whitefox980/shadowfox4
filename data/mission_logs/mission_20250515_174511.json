@@ -1,0 +1,8 @@
+{
+    "target": "https://example.com",
+    "timestamp": "2025-05-15 17:45:11",
+    "results": {
+        "'><img src=x onerror=alert(1)>": true,
+        "../../../../windows/win.ini": false
+    }
+}

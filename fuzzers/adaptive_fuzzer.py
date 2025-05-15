@@ -2,14 +2,16 @@ import random
 import json
 import requests
 from core.mutation_engine import MutationEngine
-from core.stealth import random_delay, fake_headers
-
+from core.stealth import StealthFuzzer
 class AdaptiveFuzzer:
     def __init__(self, attack_type, history_file="data/fuzz_history.json"):
         self.attack_type = attack_type
         self.engine = MutationEngine()
         self.history_file = history_file
-
+        if isinstance(vector, dict):
+            self.vector = vector.get("vector", "").lower()
+        else:
+            self.vector = str(vector).lower()
     def load_history(self):
         try:
             with open(self.history_file, "r") as f:
@@ -24,7 +26,7 @@ class AdaptiveFuzzer:
         evolved = [self.engine.mutate_payload(p) for p in payloads]
         return [item for sublist in evolved for item in sublist]
     def test_payload(self, target, payload):
-        headers = fake_headers()
+        headers = StealthFuzzer.fake_headers()
         try:
             response = requests.get(target, headers=headers, params={"q": payload}, timeout=5)
             response_text = response.text.lower()
@@ -32,9 +34,8 @@ class AdaptiveFuzzer:
             success = "error" in response_text or response_code >= 500
             return success, response_text
         except:
+            StealthFuzzer.random_delay()
             return False, ""
-        random_delay()
-
     def fuzz_target(self, target):
             history = self.load_history()
             best_payloads = self.get_successful_payloads(history)
