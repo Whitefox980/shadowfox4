@@ -1,24 +1,43 @@
-import json, os
+import os
+import json
 from collections import Counter
-from matplotlib import pyplot as plt
-from scripts.vuln_classifier import classify
+import matplotlib.pyplot as plt
 
-def radar():
-    with open("data/fuzz_history.json") as f:
-        data = json.load(f)
+MISSION_DIR = "logs/mission_logs"
 
-    counts = Counter()
-    for entries in data.values():
-        for e in entries:
-            if e.get("success"):
-                t, _ = classify(e["payload"])
-                counts[t] += 1
+def prikupi_vektore():
+    counter = Counter()
+    for file in os.listdir(MISSION_DIR):
+        if not file.endswith(".json"):
+            continue
+        path = os.path.join(MISSION_DIR, file)
+        try:
+            with open(path, "r") as f:
+                data = json.load(f)
+                for r in data.get("results", []):
+                    if isinstance(r, dict):
+                        vector = r.get("signature", {}).get("vector", "unknown")
+                        counter[vector] += 1
+        except:
+            continue
+    return counter
 
-    labels, sizes = zip(*counts.items())
-    plt.pie(sizes, labels=labels, autopct="%1.1f%%", startangle=90)
+def prikazi_pie_chart(vektor_stat):
+    labels = vektor_stat.keys()
+    sizes = vektor_stat.values()
+
+    plt.figure(figsize=(8, 8))
+    plt.pie(sizes, labels=labels, autopct="%1.1f%%", startangle=140)
+    plt.title("Distribucija Napadnih Vektora")
     plt.axis("equal")
-    plt.title("ShadowRadar: Uspešne Ranjivosti")
+    plt.tight_layout()
     plt.show()
 
 if __name__ == "__main__":
-    radar()
+    stats = prikupi_vektore()
+    if not stats:
+        print("[INFO] Nema detektovanih vektora.")
+    else:
+        for v, c in stats.most_common():
+            print(f"- {v}: {c}x")
+        prikazi_pie_chart(stats)

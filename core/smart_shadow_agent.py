@@ -19,6 +19,12 @@ class SmartShadowAgent:
         self.engine = MutationEngine()
         self.mutator = DynamicPayloadMutator()
         self.history_file = "data/payload_results.json"
+    def load_evolved_payloads():
+        path = "data/evolved_payloads.json"
+        if not os.path.exists(path):
+            return {}
+        with open(path) as f:
+            return json.load(f)
 
     def generate_attack_plan(self, target):
         metadata = {
@@ -79,6 +85,18 @@ class SmartShadowAgent:
             stealth.simulate_traffic()
 
             attack_plan = self.generate_attack_plan(target)
+
+            # Ubacujemo evolvirane payload-e iz ShadowOps
+            evolved_payloads = load_evolved_payloads()
+            for vector, payloads in evolved_payloads.items():
+                if any(mod.lower() in vector.lower() for mod in modules):
+                    for payload in payloads:
+                        attack_plan["payloads"].append({
+                            "payload": payload,
+                            "vector": vector,
+                            "success": False
+                       })
+            print(f"[SMART-X] Dodato {sum(len(v) for k,v in evolved_payloads.items() if any(m.lower() in k.lower() for m in modules))} mutiranih payload-a iz ShadowOps baze.")
             print(f"[DEBUG] attack_plan: {attack_plan}")
             results = []
 

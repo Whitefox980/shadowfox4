@@ -1,15 +1,13 @@
-class Operater:
-    def __init__(self, target_url):
-        self.url = target_url
+# agents/operator.py
 
-    def analyze(self):
-        print(f"[OPERATER] [INFO] Analizirana meta: {self.url.split('//')[-1].split('?')[0].capitalize()}")
-        return {
-            "site_data": {
-                "url": self.url,
-                "platform": "generic",
-                "headers": {
-                    "server": "unknown"
-                }
-            }
-        }
+def run_operator(target):
+    print(f"[OPERATOR] Pokrećem obradu za metu: {target}")
+
+    # Provera da li je dozvoljena
+    forbidden_keywords = ["google", "facebook", "youtube", "gov", "mil"]
+    if any(k in target.lower() for k in forbidden_keywords):
+        print("[OPERATOR] Meta je van opsega ili zabranjena za testiranje.")
+        return False
+
+    print("[OPERATOR] Meta dozvoljena. Nastavljam sa analizom.")
+    return True

@@ -1,38 +1,25 @@
 # agents/kljucar.py
 
-class Kljucar:
-    def __init__(self, site_data=None):
-        self.site_data = site_data
+# === Stara verzija (kompatibilnost sa auto_mode.py) ===
+def generate_plan(vectors, target="unknown"):
+    return [{"vector": v, "signature": "default", "target": target} for v in vectors]
 
-    def generate_plan(self, modules):
-        plan = []
-        for modul in modules:
-            if modul == "SQL Injection":
-                plan.append({
-                    "name": "SQL Injection",
-                    "payloads": [
-                        "' OR 1=1 --",
-                        "' UNION SELECT NULL,NULL --",
-                        "' AND SLEEP(5) --",
-                        "' OR 'a'='a"
-                    ]
-                })
-            elif modul == "XSS":
-                plan.append({
-                    "name": "XSS",
-                    "payloads": [
-                        "<script>alert(1)</script>",
-                        "<img src=x onerror=alert(1)>",
-                        "<svg/onload=alert(1)>"
-                    ]
-                })
-            elif modul == "LFI":
-                plan.append({
-                    "name": "LFI",
-                    "payloads": [
-                        "../../etc/passwd",
-                        "../../../../../../etc/passwd",
-                        "/etc/passwd"
-                    ]
-                })
-        return plan
+# === Nova verzija (AI planiranje) ===
+class AIKljucar:
+    def __init__(self, vectors, target):
+        self.vectors = vectors
+        self.target = target
+
+    def generate(self):
+        return [{"vector": v, "signature": self._choose_signature(v), "target": self.target} for v in self.vectors]
+
+    def _choose_signature(self, vector):
+        if vector == "SQL Injection":
+            return "time-based"
+        elif vector == "XSS":
+            return "reflected"
+        elif vector == "SSRF":
+            return "metadata probe"
+        elif vector == "LFI":
+            return "file probe"
+        return "default"

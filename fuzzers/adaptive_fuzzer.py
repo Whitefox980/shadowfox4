@@ -5,13 +5,17 @@ from core.mutation_engine import MutationEngine
 from core.stealth import StealthFuzzer
 class AdaptiveFuzzer:
     def __init__(self, attack_type, history_file="data/fuzz_history.json"):
-        self.attack_type = attack_type
-        self.engine = MutationEngine()
         self.history_file = history_file
-        if isinstance(vector, dict):
-            self.vector = vector.get("vector", "").lower()
+        self.engine = MutationEngine()
+
+        # Fleksibilno rešavanje imena vektora
+        if isinstance(attack_type, dict):
+            self.attack_type = attack_type.get("vector", "unknown").lower()
         else:
-            self.vector = str(vector).lower()
+            self.attack_type = str(attack_type).lower()
+
+        self.vector = self.attack_type  # kompatibilno za obe verzije
+
     def load_history(self):
         try:
             with open(self.history_file, "r") as f:

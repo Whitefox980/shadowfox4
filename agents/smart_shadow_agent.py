@@ -5,9 +5,11 @@ from core.mutation_engine import MutationEngine
 from fuzzers.adaptive_fuzzer import AdaptiveFuzzer
 
 class SmartShadowAgent:
-    def __init__(self, history_file="data/mission_history.json"):
+    def __init__(self,meta, history_file="data/mission_history.json"):
         self.history_file = history_file
-        self.ai_brain = AIBrain()
+        self.meta = meta
+        self.ai_brain = AIBrain(self.meta)
+        self.ai_brain = AIBrain(meta)  # ako već imaš `meta` iz prethodnog koraka
         self.engine = MutationEngine()
         self.attack_type = "XSS"  # ili "SQLi", po potrebi
         self.fuzzer = AdaptiveFuzzer(self.attack_type)

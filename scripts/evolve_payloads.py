@@ -41,3 +41,7 @@ if __name__ == "__main__":
     history = load_history()
     evolved = evolve(history)
     display(evolved)
+
+    with open("data/evolved_payloads.json", "w") as f:
+        json.dump(evolved, f, indent=2)
+    print(f"[EVOLVE] Sačuvano {sum(len(v) for v in evolved.values())} mutacija u data/evolved_payloads.json")

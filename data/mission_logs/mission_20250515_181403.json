@@ -1,8 +1,0 @@
-{
-    "target": "https://example.com",
-    "timestamp": "2025-05-15 18:14:03",
-    "results": {
-        "http://169.254.169.254/latest/meta-data/": true,
-        "'><img src=x onerror=alert(1)>": true
-    }
-}
